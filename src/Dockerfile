@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20220805.0 as builder
+FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20231116.0 as builder
 
 RUN <<EOF
     amazon-linux-extras install -y nginx1 php7.4
@@ -12,12 +12,12 @@ RUN <<EOF
 EOF
 
 ADD run.sh /srv/run.sh
-ADD bedrock/ /srv/bedrock/
-ADD opcache/ /srv/opcache/
+ADD --chown=999:999 --chmod=755 bedrock/ /srv/bedrock/
+ADD --chown=999:999 --chmod=755 opcache/ /srv/opcache/
 
 RUN cd /srv/bedrock && composer install --no-dev
 
-FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20220805.0
+FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20231116.0
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.3.3 /lambda-adapter /opt/extensions/lambda-adapter
 ARG DISABLE_OPCACHE_PRE_COMPILATION=false
 
@@ -27,8 +27,8 @@ RUN <<EOF
     yum clean all && rm -rf /var/cache/yum
 EOF
 
-ADD config/nginx/ /etc/nginx/
-ADD config/php/ /etc/
+ADD --chmod=755 config/nginx/ /etc/nginx/
+ADD --chmod=755 config/php/ /etc/
 COPY --from=builder /srv /srv
 
 RUN <<EOF
@@ -45,6 +45,7 @@ RUN <<EOF
     rm -rf /srv/bedrock/web/app/uploads
     mkdir -p /mnt/share/uploads
     ln -sfn /mnt/share/uploads /srv/bedrock/web/app/uploads
+    ls -l /srv
 EOF
 
 CMD ["/srv/run.sh"]

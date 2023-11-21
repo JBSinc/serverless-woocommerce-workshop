@@ -46,11 +46,10 @@ export class WooCommerceStack extends Stack {
     );
 
     // Aurora Mysql Database
-    const dbClusterInstanceCount: number = 1;
     const wcRdsCluster = new rds.DatabaseCluster(this, "Database", {
       engine: rds.DatabaseClusterEngine.auroraMysql({
         version: rds.AuroraMysqlEngineVersion.of(
-          "8.0.mysql_aurora.3.02.0",
+          "8.0.mysql_aurora.3.04.1",
           "8.0"
         ),
       }),
@@ -58,70 +57,12 @@ export class WooCommerceStack extends Stack {
         this.node.tryGetContext("DB_USER")
       ),
       defaultDatabaseName: "wordpress",
-      instances: dbClusterInstanceCount,
-      instanceProps: {
-        instanceType: new InstanceType("serverless"),
-        securityGroups: [wcDefaultSecurityGroup],
-        vpc: wcVPC,
-        vpcSubnets: {
-          subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
-        },
-      },
+      removalPolicy: RemovalPolicy.DESTROY,
+      writer: rds.ClusterInstance.serverlessV2('writer'),
+      serverlessV2MinCapacity: 0.5,
+      serverlessV2MaxCapacity: 2,
+      vpc: wcVPC,
     });
-
-    const serverlessV2ScalingConfiguration = {
-      MinCapacity: 0.5,
-      MaxCapacity: 32,
-    };
-
-    const dbScalingConfigure = new cr.AwsCustomResource(
-      this,
-      "DbScalingConfigure",
-      {
-        onCreate: {
-          service: "RDS",
-          action: "modifyDBCluster",
-          parameters: {
-            DBClusterIdentifier: wcRdsCluster.clusterIdentifier,
-            ServerlessV2ScalingConfiguration: serverlessV2ScalingConfiguration,
-          },
-          physicalResourceId: cr.PhysicalResourceId.of(
-            wcRdsCluster.clusterIdentifier
-          ),
-        },
-        onUpdate: {
-          service: "RDS",
-          action: "modifyDBCluster",
-          parameters: {
-            DBClusterIdentifier: wcRdsCluster.clusterIdentifier,
-            ServerlessV2ScalingConfiguration: serverlessV2ScalingConfiguration,
-          },
-          physicalResourceId: cr.PhysicalResourceId.of(
-            wcRdsCluster.clusterIdentifier
-          ),
-        },
-        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-        }),
-      }
-    );
-
-    const cfnDbCluster = wcRdsCluster.node.defaultChild as rds.CfnDBCluster;
-    const dbScalingConfigureTarget = dbScalingConfigure.node.findChild(
-      "Resource"
-    ).node.defaultChild as CfnResource;
-
-    cfnDbCluster.addPropertyOverride("EngineMode", "provisioned");
-    dbScalingConfigure.node.addDependency(cfnDbCluster);
-
-    for (let i = 1; i <= dbClusterInstanceCount; i++) {
-      (
-        wcRdsCluster.node.findChild(`Instance${i}`) as rds.CfnDBInstance
-      ).addDependsOn(dbScalingConfigureTarget);
-    }
-
-    // remove database when the stack is deleted
-    wcRdsCluster.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
     // ElastiCache
     const wcCacheSubnetGroup = new elasticache.CfnSubnetGroup(
@@ -190,7 +131,7 @@ export class WooCommerceStack extends Stack {
           }
         }
       ),
-      memorySize: 1024,
+      memorySize: 1024 * 8,
       timeout: Duration.seconds(300),
       vpc: wcVPC,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },

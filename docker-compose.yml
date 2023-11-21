@@ -10,6 +10,7 @@ services:
     volumes:
       - ./tmp/efs:/mnt/share
       - ./tmp/tmp:/tmp
+      - ./tmp/log:/var/log
     links:
       - mysql
       - redis
@@ -29,7 +30,9 @@ services:
       WP_ENV: production
       WP_DEFAULT_THEME: blocksy
       DISABLE_OPCACHE_PRE_COMPILATION: false
-    user: 1095:1095
+    # Just use root on Mac
+    # Actually, use a random id - closer to lambda
+    user: 9999:9999
     read_only: true
   mysql:
     image: mysql

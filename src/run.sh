@@ -13,4 +13,4 @@ fi
 
 /usr/sbin/php-fpm
 
-exec nginx -g "daemon off;";
+exec nginx -e /dev/stderr -g "daemon off;";
