@@ -92,6 +92,15 @@ export class WooCommerceStack extends Stack {
 
     wcCacheCluster.addDependsOn(wcCacheSubnetGroup);
 
+    // Lambda SG - allow lambda to RDS and Redis
+    const lambdaSG = new ec2.SecurityGroup(this, `lambdaSG`, {
+      vpc: wcVPC,
+      allowAllOutbound: true,
+    });
+
+    lambdaSG.connections.allowTo(wcRdsCluster, ec2.Port.tcp(3306), "Allow lambda to RDS");
+    lambdaSG.connections.allowTo(wcDefaultSecurityGroup, ec2.Port.tcp(6379), "Allow lambda to redis");
+
     // S3 Bucket
     const wcBucket = new s3.Bucket(this, "bucket", {
       removalPolicy: RemovalPolicy.DESTROY,
@@ -124,7 +133,7 @@ export class WooCommerceStack extends Stack {
     const wcFunction = new lambda.DockerImageFunction(this, "woocommerce", {
       architecture: lambda.Architecture.X86_64,
       code: lambda.DockerImageCode.fromImageAsset(
-        path.join(__dirname, "..", "..", "src"), 
+        path.join(__dirname, "..", "..", "src"),
         {
           buildArgs: {
             'DISABLE_OPCACHE_PRE_COMPILATION': this.node.tryGetContext("DISABLE_OPCACHE_PRE_COMPILATION")
@@ -136,7 +145,7 @@ export class WooCommerceStack extends Stack {
       vpc: wcVPC,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
       tracing: lambda.Tracing.ACTIVE,
-      securityGroups: [wcDefaultSecurityGroup],
+      securityGroups: [lambdaSG],
       filesystem: lambda.FileSystem.fromEfsAccessPoint(
         wcEfsAccessPoint,
         "/mnt/share"
@@ -147,12 +156,8 @@ export class WooCommerceStack extends Stack {
         READINESS_CHECK_PATH: this.node.tryGetContext("READINESS_CHECK_PATH"),
         DB_HOST: wcRdsCluster.secret!.secretValueFromJson("host").toString(),
         DB_PORT: wcRdsCluster.secret!.secretValueFromJson("port").toString(),
-        DB_USER: wcRdsCluster
-          .secret!.secretValueFromJson("username")
-          .toString(),
-        DB_PASSWORD: wcRdsCluster
-          .secret!.secretValueFromJson("password")
-          .toString(),
+        DB_USER: wcRdsCluster.secret!.secretValueFromJson("username").toString(),
+        DB_PASSWORD: wcRdsCluster.secret!.secretValueFromJson("password").toString(),
         DB_NAME: wcRdsCluster.secret!.secretValueFromJson("dbname").toString(),
         WP_ENV: this.node.tryGetContext("WP_ENV"),
         WP_HOME: this.node.tryGetContext("WP_HOME"),

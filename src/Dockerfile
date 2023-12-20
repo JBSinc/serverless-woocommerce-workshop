@@ -11,7 +11,7 @@ RUN <<EOF
     mv composer.phar /usr/local/bin/composer
 EOF
 
-ADD run.sh /srv/run.sh
+ADD --chown=999:999 --chmod=755 run.sh /srv/run.sh
 ADD --chown=999:999 --chmod=755 bedrock/ /srv/bedrock/
 ADD --chown=999:999 --chmod=755 opcache/ /srv/opcache/
 
