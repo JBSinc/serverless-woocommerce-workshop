@@ -5,7 +5,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2.0.20231116.0 as builder
 RUN <<EOF
     amazon-linux-extras install -y nginx1 php8.1
     yum groupinstall -y "Development Tools"
-    yum install -y php-devel php-{opcache,curl,gd,intl,mbstring,soap,xml,zip,dom,imagick,posix,pear} php-pecl-{igbinary,redis}
+    yum install -y php-devel php-{opcache,curl,gd,intl,mbstring,soap,xml,zip,dom,imagick,posix,pear,redis} php-pecl-{igbinary,redis}
     yum clean all && rm -rf /var/cache/yum
     curl -sS https://raw.githubusercontent.com/composer/getcomposer.org/9bef96e8ce65b79bd29c525fa918980889c9a124/web/installer | php -- --quiet
     mv composer.phar /usr/local/bin/composer
@@ -23,7 +23,7 @@ ARG DISABLE_OPCACHE_PRE_COMPILATION=false
 
 RUN <<EOF
     amazon-linux-extras install -y nginx1 php8.1
-    yum install -y sudo php-{opcache,curl,gd,intl,mbstring,soap,xml,zip,dom,imagick,posix} php-pecl-{igbinary,redis}
+    yum install -y sudo php-{opcache,curl,gd,intl,mbstring,soap,xml,zip,dom,imagick,posix,redis} php-pecl-{igbinary,redis}
     yum clean all && rm -rf /var/cache/yum
 EOF
 
