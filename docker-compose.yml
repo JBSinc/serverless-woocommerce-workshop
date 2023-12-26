@@ -11,12 +11,14 @@ services:
       - ./tmp/efs:/mnt/share
       - ./tmp/tmp:/tmp
       - ./tmp/log:/var/log
+      - ./src/:/src
     links:
       - mysql
       - redis
     depends_on:
       - mysql
       - redis
+      - s3mock
     environment:
       REDIS_CFG_ENDPOINT: 'redis'
       REDIS_PORT: 6379
@@ -29,6 +31,7 @@ services:
       WP_SITEURL: http://localhost:8080/wp
       WP_ENV: production
       WP_DEFAULT_THEME: blocksy
+      S3_ENDPOINT: 'http://s3mock:9090'
       DISABLE_OPCACHE_PRE_COMPILATION: false
     # Just use root on Mac
     # Actually, use a random id - closer to lambda
@@ -52,3 +55,12 @@ services:
     volumes:
       - ./tmp/redis:/data
     command: redis-server --appendonly yes
+  s3mock:
+    image: adobe/s3mock
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./tmp/s3mock:/var/lib/s3mock
+    environment:
+      initialBuckets: test-bucket
+
