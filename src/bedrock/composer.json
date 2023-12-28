@@ -28,6 +28,10 @@
       "type": "composer",
       "url": "https://wpackagist.org",
       "only": ["wpackagist-plugin/*", "wpackagist-theme/*"]
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/nickdnickd/S3-Uploads"
     }
   ],
   "require": {
@@ -49,7 +53,7 @@
     "wpackagist-plugin/batcache": "^1.5",
     "wpackagist-plugin/redis-cache": "^2.5",
     "wpackagist-theme/storefront": "^4.5",
-    "humanmade/s3-uploads": "^3.0.7"
+    "nickdnickd/s3-uploads": "dev-allow-bedrock-dir-autoload"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^3.6.2",

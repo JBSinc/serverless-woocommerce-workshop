@@ -28,11 +28,15 @@ ARG DISABLE_OPCACHE_PRE_COMPILATION=false
 
 RUN <<EOF
     amazon-linux-extras install -y nginx1 php8.1
-    yum install -y sudo php-{opcache,curl,gd,intl,mbstring,soap,xml,zip,dom,imagick,posix,redis}
+    yum install -y sudo php-{opcache,curl,gd,intl,mbstring,soap,xml,zip,dom,imagick,posix,redis} less
     yum clean all && rm -rf /var/cache/yum
     echo "extension=igbinary.so" >> /etc/php.d/igbinary.ini
     echo "extension=redis.so" >> /etc/php.d/redis.ini
 EOF
+
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
 
 ADD --chmod=755 config/nginx/ /etc/nginx/
 ADD --chmod=755 config/php/ /etc/
