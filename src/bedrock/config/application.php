@@ -115,9 +115,7 @@ Config::define('WP_REDIS_DATABASE', env('REDIS_DATABASE'));
 Config::define('WP_REDIS_DISABLED', env('REDIS_DISABLED'));
 
 // S3 Uploads
-Config::define( 'S3_UPLOADS_BUCKET', 'test-bucket' );
-Config::define( 'S3_UPLOADS_BUCKET_URL', 'http://localhost:9090/test-bucket' );
-//Config::define( 'S3_UPLOADS_REGION', '' ); // the s3 bucket region (excluding the rest of the URL)
+Config::define( 'S3_UPLOADS_BUCKET', env('S3_UPLOADS_BUCKET'));
 
 // Default theme
 Config::define('WP_DEFAULT_THEME', env('WP_DEFAULT_THEME'));

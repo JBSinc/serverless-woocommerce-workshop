@@ -29,7 +29,7 @@ services:
       EFS_PATH: '/mnt/share'
       WP_HOME: http://localhost:8080
       WP_SITEURL: http://localhost:8080/wp
-      WP_ENV: production
+      WP_ENV: development
       WP_DEFAULT_THEME: blocksy
       S3_ENDPOINT: 'http://s3mock:9090'
       DISABLE_OPCACHE_PRE_COMPILATION: false
