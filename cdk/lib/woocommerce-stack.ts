@@ -105,6 +105,8 @@ export class WooCommerceStack extends Stack {
     const wcBucket = new s3.Bucket(this, "bucket", {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      blockPublicAccess: new s3.BlockPublicAccess({ blockPublicPolicy: false }),
+      publicReadAccess: true,
     });
 
     // efs file system
@@ -173,6 +175,7 @@ export class WooCommerceStack extends Stack {
         LOGGED_IN_SALT: this.node.tryGetContext("LOGGED_IN_SALT"),
         NONCE_SALT: this.node.tryGetContext("NONCE_SALT"),
         S3_UPLOADS_BUCKET: wcBucket.bucketName,
+        S3_UPLOADS_DISABLE_REPLACE_UPLOAD_URL: this.node.tryGetContext("S3_UPLOADS_DISABLE_REPLACE_UPLOAD_URL"),
         REDIS_CFG_ENDPOINT: wcCacheCluster.attrRedisEndpointAddress,
         REDIS_PORT: wcCacheCluster.attrRedisEndpointPort,
         REDIS_TIMEOUT: "1",

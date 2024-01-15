@@ -114,11 +114,50 @@ Config::define('WP_REDIS_DATABASE', env('REDIS_DATABASE'));
 // bypass the object cache, useful for debugging
 Config::define('WP_REDIS_DISABLED', env('REDIS_DISABLED'));
 
-// S3 Uploads
-Config::define( 'S3_UPLOADS_BUCKET', env('S3_UPLOADS_BUCKET'));
-
 // Default theme
 Config::define('WP_DEFAULT_THEME', env('WP_DEFAULT_THEME'));
+
+
+/**
+ * S3 Uploads plugin settings (https://github.com/nickdnickd/S3-Uploads)
+ *
+ * Sample Commands:
+ *
+ * wp s3-uploads verify       # verify config/creds
+ * wp s3-uploads ls [<path>]  # List s3 contents
+ *
+ *
+ * Note: as either <from> or <to> can be S3 or local locations, you must
+ * specify the full S3 location via s3://mybucket/mydirectory for example
+ * cp ./test.txt s3://mybucket/test.txt.
+ *
+ * wp s3-uploads upload-directory <from> <to> [--verbose]
+ * wp s3-uploads cp <from> <to>
+ *
+ */
+
+// bucket name can include a path prefix eg "my-bucket/site-name"
+Config::define('S3_UPLOADS_BUCKET', env('S3_UPLOADS_BUCKET'));
+
+// the s3 bucket region (excluding the rest of the URL) - Probably defaults to the region you're in?
+Config:define('S3_UPLOADS_REGION', env('S3_UPLOADS_REGION', ''));
+
+// Ok for local testing? No, it's not
+Config::define('S3_UPLOADS_USE_INSTANCE_PROFILE', true );
+
+// disable URL rewriting alltogether - CloudFront should do path based routing
+$dotenv->ifPresent('S3_UPLOADS_DISABLE_REPLACE_UPLOAD_URL')->isBoolean();
+Config::define('S3_UPLOADS_DISABLE_REPLACE_UPLOAD_URL', env('S3_UPLOADS_DISABLE_REPLACE_UPLOAD_URL', false ));
+
+$dotenv->ifPresent('S3_UPLOADS_USE_LOCAL')->isBoolean();
+Config::define('S3_UPLOADS_USE_LOCAL', env('S3_UPLOADS_USE_LOCAL', false));
+
+// Always enable the plugin
+Config::define( 'S3_UPLOADS_AUTOENABLE', true );
+
+// Public ACLs suck anyway
+Config::define('S3_UPLOADS_OBJECT_ACL', 'private');
+
 
 /**
  * Debugging Settings

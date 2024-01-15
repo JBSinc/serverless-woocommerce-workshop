@@ -11,7 +11,7 @@ services:
       - ./tmp/efs:/mnt/share
       - ./tmp/tmp:/tmp
       - ./tmp/log:/var/log
-      - ./src/:/src
+      # - ./src/:/srv
     links:
       - mysql
       - redis
@@ -31,12 +31,17 @@ services:
       WP_SITEURL: http://localhost:8080/wp
       WP_ENV: development
       WP_DEFAULT_THEME: blocksy
-      S3_ENDPOINT: 'http://s3mock:9090'
+      S3_UPLOADS_USE_LOCAL: 'true'
+      S3_UPLOADS_BUCKET: 'local-test-bucket'
+      # Fake but whatever, local seems to need/want it
+      S3_UPLOADS_REGION: 'us-east-1'
+      # S3_ENDPOINT: 'http://s3mock:9090'
       DISABLE_OPCACHE_PRE_COMPILATION: false
     # Just use root on Mac
     # Actually, use a random id - closer to lambda
     user: 9999:9999
-    read_only: true
+    # Nah brah, I gotta do stuff
+    # read_only: true
   mysql:
     image: mysql
     restart: always

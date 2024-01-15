@@ -18,3 +18,10 @@ ini_set('display_errors', '1');
 
 // Enable plugin and theme updates and installation from the admin
 Config::define('DISALLOW_FILE_MODS', false);
+
+// Lazy - don't run development in the cloud
+Config::define('S3_UPLOADS_USE_INSTANCE_PROFILE', false );
+
+// You can set key and secret directly:
+Config::define( 'S3_UPLOADS_KEY', 'Fake' );
+Config::define( 'S3_UPLOADS_SECRET', 'NoOneCares' );
